@@ -1,5 +1,6 @@
 package ru.hogwarts.school.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
@@ -9,7 +10,7 @@ import ru.hogwarts.school.service.FacultyService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/faculty")
+@RequestMapping("/faculties")
 public class FacultyController {
     private final FacultyService facultyService;
 
@@ -25,7 +26,8 @@ public class FacultyController {
 
     @PostMapping
     public ResponseEntity<Faculty> createFaculty(@RequestBody Faculty faculty) {
-        return ResponseEntity.ok(facultyService.addFaculty(faculty));
+        Faculty createdFaculty = facultyService.addFaculty(faculty);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdFaculty); // изменено на 201
     }
 
     @PutMapping("{id}")
@@ -37,7 +39,7 @@ public class FacultyController {
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteFaculty(@PathVariable Long id) {
         facultyService.deleteFaculty(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build(); // изменено на 204
     }
 
     @GetMapping("/search")
@@ -50,4 +52,10 @@ public class FacultyController {
         List<Student> students = facultyService.findStudentsOfFaculty(id);
         return students != null ? ResponseEntity.ok(students) : ResponseEntity.notFound().build();
     }
+
+    @GetMapping
+    public ResponseEntity<List<Faculty>> getAllFaculties() {
+        return ResponseEntity.ok(facultyService.getAllFaculties());
+    }
+
 }

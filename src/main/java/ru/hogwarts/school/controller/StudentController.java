@@ -1,5 +1,6 @@
 package ru.hogwarts.school.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
@@ -9,12 +10,18 @@ import ru.hogwarts.school.service.StudentService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/student")
+@RequestMapping("/students")
 public class StudentController {
     private final StudentService studentService;
 
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Student>> getAllStudents() {
+        List<Student> students = studentService.findAllStudents();
+        return ResponseEntity.ok(students);
     }
 
     @GetMapping("{id}")
@@ -25,19 +32,20 @@ public class StudentController {
 
     @PostMapping
     public ResponseEntity<Student> createStudent(@RequestBody Student student) {
-        return ResponseEntity.ok(studentService.addStudent(student));
+        Student createdStudent = studentService.addStudent(student);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdStudent);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<Student> editStudent(@RequestBody Student student, @PathVariable Long id) {
         Student updatedStudent = studentService.editStudent(id, student);
-        return updatedStudent != null ? ResponseEntity.ok(updatedStudent) : ResponseEntity.badRequest().build();
+        return updatedStudent != null ? ResponseEntity.ok(updatedStudent) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build(); // Возвращаем статус 204
     }
 
     @GetMapping("/age-range")
@@ -45,10 +53,9 @@ public class StudentController {
         return ResponseEntity.ok(studentService.findStudentsByAgeRange(min, max));
     }
 
-    @GetMapping("/{id}/faculty")
+    @GetMapping("/{id}/faculties")
     public ResponseEntity<Faculty> getStudentFaculty(@PathVariable Long id) {
         Faculty faculty = studentService.findFacultyOfStudent(id);
         return faculty != null ? ResponseEntity.ok(faculty) : ResponseEntity.notFound().build();
     }
 }
-

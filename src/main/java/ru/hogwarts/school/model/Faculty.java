@@ -16,8 +16,10 @@ public class Faculty {
     @OneToMany(mappedBy = "faculty")
     private List<Student> students;
 
+
     public Faculty() {
     }
+
 
     public Faculty(long id, String name, String color) {
         this.id = id;
@@ -25,7 +27,13 @@ public class Faculty {
         this.color = color;
     }
 
-    // Getters, Setters, equals, hashCode, toString
+    // Конструктор с двумя параметрами
+    public Faculty(String name, String color) {
+        this.name = name;
+        this.color = color;
+    }
+
+    // Геттеры, сеттеры, equals, hashCode, toString
 
     public long getId() {
         return id;

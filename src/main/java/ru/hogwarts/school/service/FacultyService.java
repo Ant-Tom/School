@@ -43,4 +43,9 @@ public class FacultyService {
         Faculty faculty = findFaculty(id);
         return faculty != null ? faculty.getStudents() : null;
     }
+
+    public List<Faculty> getAllFaculties() {
+        return facultyRepository.findAll();
+    }
+
 }
