@@ -1,6 +1,8 @@
 package ru.hogwarts.school.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,48 +27,37 @@ public class AvatarController {
         this.avatarService = avatarService;
     }
 
-    @PostMapping(value = "/{studentId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadAvatar(@PathVariable Long studentId, @RequestParam MultipartFile avatar) {
-        try {
-            avatarService.uploadAvatar(studentId, avatar);
-            return ResponseEntity.ok("Avatar uploaded successfully.");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to upload avatar: " + e.getMessage());
-        }
+    @PostMapping(value = "/{studentId}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadAvatar(@PathVariable Long studentId, @RequestParam MultipartFile avatar) throws IOException {
+        avatarService.uploadAvatar(studentId, avatar);
+        return ResponseEntity.ok("Avatar uploaded successfully");
     }
 
-    @GetMapping(value = "/{id}/preview")
-    public ResponseEntity<byte[]> downloadAvatarPreview(@PathVariable Long id) {
+    @GetMapping("/{id}/avatar/previews")
+    public ResponseEntity<byte[]> downloadAvatar(@PathVariable Long id) {
         Avatar avatar = avatarService.findAvatar(id);
-        if (avatar == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(avatar.getMediaType()));
         headers.setContentLength(avatar.getData().length);
-        return ResponseEntity.ok().headers(headers).body(avatar.getData());
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(avatar.getData());
     }
 
-    @GetMapping(value = "/{id}/download")
-    public void downloadAvatarFile(@PathVariable Long id, HttpServletResponse response) throws IOException {
+    @GetMapping("/{id}/avatar")
+    public void downloadAvatar(@PathVariable Long id, HttpServletResponse response) throws IOException {
         Avatar avatar = avatarService.findAvatar(id);
-        if (avatar == null) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-            return;
-        }
-
         Path path = Path.of(avatar.getFilePath());
-        response.setStatus(HttpStatus.OK.value());
-        response.setContentType(avatar.getMediaType());
-        response.setContentLengthLong(avatar.getFileSize());
-
-        try (InputStream is = Files.newInputStream(path);
-             OutputStream os = response.getOutputStream()) {
+        try (InputStream is = Files.newInputStream(path); OutputStream os = response.getOutputStream()) {
+            response.setStatus(200);
+            response.setContentType(avatar.getMediaType());
+            response.setContentLength((int) avatar.getFileSize());
             is.transferTo(os);
-        } catch (IOException e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<Avatar>> getAvatars(@RequestParam int page, @RequestParam int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(avatarService.getAvatars(pageable));
     }
 }
+
