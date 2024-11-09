@@ -1,0 +1,25 @@
+# db/index-practice.yaml
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: "your_name"
+      changes:
+        - createIndex:
+            tableName: "student"
+            indexName: "idx_student_name"
+            columns:
+              - column:
+                  name: "name"
+
+  - changeSet:
+      id: 2
+      author: "your_name"
+      changes:
+        - createIndex:
+            tableName: "faculty"
+            indexName: "idx_faculty_name_color"
+            columns:
+              - column:
+                  name: "name"
+              - column:
+                  name: "color"
