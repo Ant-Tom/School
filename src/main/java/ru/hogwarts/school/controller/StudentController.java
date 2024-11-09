@@ -20,8 +20,7 @@ public class StudentController {
 
     @GetMapping
     public ResponseEntity<List<Student>> getAllStudents() {
-        List<Student> students = studentService.findAllStudents();
-        return ResponseEntity.ok(students);
+        return ResponseEntity.ok(studentService.findAllStudents());
     }
 
     @GetMapping("{id}")
@@ -32,8 +31,7 @@ public class StudentController {
 
     @PostMapping
     public ResponseEntity<Student> createStudent(@RequestBody Student student) {
-        Student createdStudent = studentService.addStudent(student);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdStudent);
+        return ResponseEntity.status(HttpStatus.CREATED).body(studentService.addStudent(student));
     }
 
     @PutMapping("{id}")
@@ -45,7 +43,7 @@ public class StudentController {
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
-        return ResponseEntity.noContent().build(); // Возвращаем статус 204
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/age-range")
@@ -57,5 +55,20 @@ public class StudentController {
     public ResponseEntity<Faculty> getStudentFaculty(@PathVariable Long id) {
         Faculty faculty = studentService.findFacultyOfStudent(id);
         return faculty != null ? ResponseEntity.ok(faculty) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<Long> getTotalStudents() {
+        return ResponseEntity.ok(studentService.getTotalStudents());
+    }
+
+    @GetMapping("/average-age")
+    public ResponseEntity<Double> getAverageStudentAge() {
+        return ResponseEntity.ok(studentService.getAverageAge());
+    }
+
+    @GetMapping("/last-five")
+    public ResponseEntity<List<Student>> getLastFiveStudents() {
+        return ResponseEntity.ok(studentService.getLastFiveStudents());
     }
 }

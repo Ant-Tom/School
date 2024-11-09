@@ -1,5 +1,6 @@
 package ru.hogwarts.school.service;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -19,11 +20,11 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
-    public Student findStudent(long id) {
+    public Student findStudent(Long id) {
         return studentRepository.findById(id).orElse(null);
     }
 
-    public Student editStudent(long id, Student student) {
+    public Student editStudent(Long id, Student student) {
         if (studentRepository.existsById(id)) {
             student.setId(id);
             return studentRepository.save(student);
@@ -31,20 +32,33 @@ public class StudentService {
         return null;
     }
 
-    public void deleteStudent(long id) {
+    public void deleteStudent(Long id) {
         studentRepository.deleteById(id);
+    }
+
+    public List<Student> findAllStudents() {
+        return studentRepository.findAll();
     }
 
     public List<Student> findStudentsByAgeRange(int min, int max) {
         return studentRepository.findByAgeBetween(min, max);
     }
 
-    public Faculty findFacultyOfStudent(long id) {
-        Student student = findStudent(id);
-        return student != null ? student.getFaculty() : null;
+    public long getTotalStudents() {
+        return studentRepository.countAllStudents();
     }
 
-    public List<Student> findAllStudents() {
-        return studentRepository.findAll();
+    public double getAverageAge() {
+        return studentRepository.getAverageStudentAge();
+    }
+
+    public List<Student> getLastFiveStudents() {
+        return studentRepository.findLastFiveStudents(PageRequest.of(0, 5));
+    }
+
+
+    public Faculty findFacultyOfStudent(Long studentId) {
+        Student student = findStudent(studentId);
+        return student != null ? student.getFaculty() : null;
     }
 }
