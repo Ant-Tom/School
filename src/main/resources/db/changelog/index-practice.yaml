@@ -1,25 +1,43 @@
-# db/index-practice.yaml
 databaseChangeLog:
   - changeSet:
       id: 1
-      author: "your_name"
+      author: "Anton"
+      preConditions:
+        - onFail: MARK_RAN
+          sqlCheck:
+            dbms: postgresql
+            sql: "SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'student'"
       changes:
-        - createIndex:
-            tableName: "student"
-            indexName: "idx_student_name"
-            columns:
-              - column:
-                  name: "name"
-
+        - sql:
+            dbms: postgresql
+            splitStatements: false
+            sql: |
+              DO
+              $$
+              BEGIN
+                 IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_student_name') THEN
+                    CREATE INDEX idx_student_name ON public.student(name);
+                 END IF;
+              END;
+              $$;
   - changeSet:
       id: 2
-      author: "your_name"
+      author: "Anton"
+      preConditions:
+        - onFail: MARK_RAN
+          sqlCheck:
+            dbms: postgresql
+            sql: "SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'faculty'"
       changes:
-        - createIndex:
-            tableName: "faculty"
-            indexName: "idx_faculty_name_color"
-            columns:
-              - column:
-                  name: "name"
-              - column:
-                  name: "color"
+        - sql:
+            dbms: postgresql
+            splitStatements: false
+            sql: |
+              DO
+              $$
+              BEGIN
+                 IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_faculty_name_color') THEN
+                    CREATE INDEX idx_faculty_name_color ON public.faculty(name, color);
+                 END IF;
+              END;
+              $$;
