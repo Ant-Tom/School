@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: "Anton"
+      preConditions:
+        - onFail: MARK_RAN
+          sqlCheck:
+            dbms: postgresql
+            sql: "SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'student'"
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: false
+            sql: |
+              DO
+              $$
+              BEGIN
+                 IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_student_name') THEN
+                    CREATE INDEX idx_student_name ON public.student(name);
+                 END IF;
+              END;
+              $$;
+  - changeSet:
+      id: 2
+      author: "Anton"
+      preConditions:
+        - onFail: MARK_RAN
+          sqlCheck:
+            dbms: postgresql
+            sql: "SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'faculty'"
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: false
+            sql: |
+              DO
+              $$
+              BEGIN
+                 IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_faculty_name_color') THEN
+                    CREATE INDEX idx_faculty_name_color ON public.faculty(name, color);
+                 END IF;
+              END;
+              $$;
