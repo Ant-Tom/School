@@ -9,6 +9,7 @@ import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
@@ -31,6 +32,27 @@ public class StudentService {
             logger.error("There is no student with id = {}", id);
             return new RuntimeException("Student not found");
         });
+    }
+
+    public List<String> getStudentNamesStartingWithA() {
+        return studentRepository.findAll().stream()
+                .map(Student::getName)
+                .filter(name -> name.startsWith("А"))
+                .map(String::toUpperCase)
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    public double getAverageAgeOfStudents() {
+        return studentRepository.findAll().stream()
+                .mapToInt(Student::getAge)
+                .average()
+                .orElse(0.0);
+    }
+
+    public int getOptimizedSum() {
+        int n = 1_000_000;
+        return n * (n + 1) / 2;
     }
 
     public Student editStudent(Long id, Student student) {

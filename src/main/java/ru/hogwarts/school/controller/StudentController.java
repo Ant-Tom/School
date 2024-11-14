@@ -23,6 +23,17 @@ public class StudentController {
         return ResponseEntity.ok(studentService.findAllStudents());
     }
 
+    @GetMapping("/names-starting-with-a")
+    public List<String> getStudentNamesStartingWithA() {
+        return studentService.getStudentNamesStartingWithA();
+    }
+
+    @GetMapping("/optimized-sum")
+    public int getOptimizedSum() {
+        return studentService.getOptimizedSum();
+    }
+
+
     @GetMapping("{id}")
     public ResponseEntity<Student> getStudentInfo(@PathVariable Long id) {
         Student student = studentService.findStudent(id);
