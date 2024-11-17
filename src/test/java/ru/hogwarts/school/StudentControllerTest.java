@@ -74,4 +74,6 @@ public class StudentControllerTest {
         ResponseEntity<Student> response = restTemplate.getForEntity("/students/" + existingStudentId, Student.class);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
+
+
 }

@@ -75,6 +75,56 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
+    public void printStudentsInParallel() {
+        List<Student> students = studentRepository.findAll();
+        if (students.size() < 6) {
+            logger.warn("Not enough students to perform the task. At least 6 students required.");
+            return;
+        }
+
+        // Первые два имени в основном потоке
+        System.out.println(students.get(0).getName());
+        System.out.println(students.get(1).getName());
+
+        // Третий и четвертый в параллельном потоке
+        new Thread(() -> {
+            System.out.println(students.get(2).getName());
+            System.out.println(students.get(3).getName());
+        }).start();
+
+        // Пятый и шестой в еще одном параллельном потоке
+        new Thread(() -> {
+            System.out.println(students.get(4).getName());
+            System.out.println(students.get(5).getName());
+        }).start();
+    }
+
+    public void printStudentsSynchronized() {
+        List<Student> students = studentRepository.findAll();
+        if (students.size() < 6) {
+            logger.warn("Not enough students to perform the task. At least 6 students required.");
+            return;
+        }
+        synchronizedPrint(students.get(0).getName());
+        synchronizedPrint(students.get(1).getName());
+
+
+        new Thread(() -> {
+            synchronizedPrint(students.get(2).getName());
+            synchronizedPrint(students.get(3).getName());
+        }).start();
+
+
+        new Thread(() -> {
+            synchronizedPrint(students.get(4).getName());
+            synchronizedPrint(students.get(5).getName());
+        }).start();
+    }
+
+    private synchronized void synchronizedPrint(String name) {
+        System.out.println(name);
+    }
+
     public List<Student> findStudentsByAgeRange(int min, int max) {
         logger.info("Was invoked method to find students by age range {} - {}", min, max);
         return studentRepository.findByAgeBetween(min, max);

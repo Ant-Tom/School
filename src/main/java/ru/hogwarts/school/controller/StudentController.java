@@ -1,5 +1,6 @@
 package ru.hogwarts.school.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,18 @@ public class StudentController {
         this.studentService = studentService;
     }
 
+    @Operation(summary = "Печать имен студентов в параллельном режиме")
+    @GetMapping("/print-parallel")
+    public void printStudentsInParallel() {
+        studentService.printStudentsInParallel();
+    }
+
+    @Operation(summary = "Печать имен студентов в синхронизированном режиме")
+    @GetMapping("/print-synchronized")
+    public void printStudentsSynchronized() {
+        studentService.printStudentsSynchronized();
+    }
+
     @GetMapping
     public ResponseEntity<List<Student>> getAllStudents() {
         return ResponseEntity.ok(studentService.findAllStudents());
@@ -32,7 +45,6 @@ public class StudentController {
     public int getOptimizedSum() {
         return studentService.getOptimizedSum();
     }
-
 
     @GetMapping("{id}")
     public ResponseEntity<Student> getStudentInfo(@PathVariable Long id) {

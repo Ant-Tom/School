@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.hogwarts.school.controller.StudentController;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -82,5 +83,17 @@ public class StudentControllerMvcTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    void testPrintStudentsInParallel() throws Exception {
+        mockMvc.perform(get("/students/print-parallel"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testPrintStudentsSynchronized() throws Exception {
+        mockMvc.perform(get("/students/print-synchronized"))
+                .andExpect(status().isOk());
     }
 }
