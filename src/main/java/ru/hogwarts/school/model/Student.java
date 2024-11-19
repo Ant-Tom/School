@@ -16,18 +16,33 @@ public class Student {
     @JoinColumn(name = "faculty_id")
     private Faculty faculty;
 
-    public Student() {
-    }
+    public Student() {}
 
-    public Student(long id, String name, int age) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-    }
+    public static class Builder {
+        private final long id;
+        private final String name;
+        private final int age;
+        private Faculty faculty;
 
-    public Student(String name, int age) {
-        this.name = name;
-        this.age = age;
+        public Builder(long id, String name, int age) {
+            this.id = id;
+            this.name = name;
+            this.age = age;
+        }
+
+        public Builder withFaculty(Faculty faculty) {
+            this.faculty = faculty;
+            return this;
+        }
+
+        public Student build() {
+            Student student = new Student();
+            student.id = this.id;
+            student.name = this.name;
+            student.age = this.age;
+            student.faculty = this.faculty;
+            return student;
+        }
     }
 
     @Override

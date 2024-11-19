@@ -8,6 +8,7 @@ import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,22 +83,53 @@ public class StudentService {
             return;
         }
 
+        // Инициализация CountDownLatch с количеством потоков (2 в данном случае)
+        CountDownLatch latch = new CountDownLatch(2);
+
         // Первые два имени в основном потоке
-        System.out.println(students.get(0).getName());
-        System.out.println(students.get(1).getName());
+        printStudentName(students.get(0));
+        printStudentName(students.get(1));
 
         // Третий и четвертый в параллельном потоке
         new Thread(() -> {
-            System.out.println(students.get(2).getName());
-            System.out.println(students.get(3).getName());
+            try {
+                printStudentName(students.get(2));
+                printStudentName(students.get(3));
+            } finally {
+                latch.countDown(); // Уменьшаем счетчик при завершении потока
+            }
         }).start();
 
         // Пятый и шестой в еще одном параллельном потоке
         new Thread(() -> {
-            System.out.println(students.get(4).getName());
-            System.out.println(students.get(5).getName());
+            try {
+                printStudentName(students.get(4));
+                printStudentName(students.get(5));
+            } finally {
+                latch.countDown(); // Уменьшаем счетчик при завершении потока
+            }
         }).start();
+
+        // Ожидание завершения всех потоков
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Восстанавливаем статус прерывания
+            logger.error("The main thread was interrupted", e);
+        }
+
+        logger.info("All parallel threads have completed their execution");
     }
+
+
+    public void printStudentName(Student student) {
+        if (student != null) {
+            System.out.println(student.getName());
+        } else {
+            logger.warn("Attempted to print a null student");
+        }
+    }
+
 
     public void printStudentsSynchronized() {
         List<Student> students = studentRepository.findAll();
