@@ -8,7 +8,9 @@ import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
@@ -33,6 +35,27 @@ public class StudentService {
         });
     }
 
+    public List<String> getStudentNamesStartingWithA() {
+        return studentRepository.findAll().stream()
+                .map(Student::getName)
+                .filter(name -> name.startsWith("А"))
+                .map(String::toUpperCase)
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    public double getAverageAgeOfStudents() {
+        return studentRepository.findAll().stream()
+                .mapToInt(Student::getAge)
+                .average()
+                .orElse(0.0);
+    }
+
+    public int getOptimizedSum() {
+        int n = 1_000_000;
+        return n * (n + 1) / 2;
+    }
+
     public Student editStudent(Long id, Student student) {
         logger.info("Was invoked method to edit student with id {}", id);
         if (studentRepository.existsById(id)) {
@@ -51,6 +74,87 @@ public class StudentService {
     public List<Student> findAllStudents() {
         logger.info("Was invoked method to get all students");
         return studentRepository.findAll();
+    }
+
+    public void printStudentsInParallel() {
+        List<Student> students = studentRepository.findAll();
+        if (students.size() < 6) {
+            logger.warn("Not enough students to perform the task. At least 6 students required.");
+            return;
+        }
+
+        // Инициализация CountDownLatch с количеством потоков (2 в данном случае)
+        CountDownLatch latch = new CountDownLatch(2);
+
+        // Первые два имени в основном потоке
+        printStudentName(students.get(0));
+        printStudentName(students.get(1));
+
+        // Третий и четвертый в параллельном потоке
+        new Thread(() -> {
+            try {
+                printStudentName(students.get(2));
+                printStudentName(students.get(3));
+            } finally {
+                latch.countDown(); // Уменьшаем счетчик при завершении потока
+            }
+        }).start();
+
+        // Пятый и шестой в еще одном параллельном потоке
+        new Thread(() -> {
+            try {
+                printStudentName(students.get(4));
+                printStudentName(students.get(5));
+            } finally {
+                latch.countDown(); // Уменьшаем счетчик при завершении потока
+            }
+        }).start();
+
+        // Ожидание завершения всех потоков
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Восстанавливаем статус прерывания
+            logger.error("The main thread was interrupted", e);
+        }
+
+        logger.info("All parallel threads have completed their execution");
+    }
+
+
+    public void printStudentName(Student student) {
+        if (student != null) {
+            System.out.println(student.getName());
+        } else {
+            logger.warn("Attempted to print a null student");
+        }
+    }
+
+
+    public void printStudentsSynchronized() {
+        List<Student> students = studentRepository.findAll();
+        if (students.size() < 6) {
+            logger.warn("Not enough students to perform the task. At least 6 students required.");
+            return;
+        }
+        synchronizedPrint(students.get(0).getName());
+        synchronizedPrint(students.get(1).getName());
+
+
+        new Thread(() -> {
+            synchronizedPrint(students.get(2).getName());
+            synchronizedPrint(students.get(3).getName());
+        }).start();
+
+
+        new Thread(() -> {
+            synchronizedPrint(students.get(4).getName());
+            synchronizedPrint(students.get(5).getName());
+        }).start();
+    }
+
+    private synchronized void synchronizedPrint(String name) {
+        System.out.println(name);
     }
 
     public List<Student> findStudentsByAgeRange(int min, int max) {

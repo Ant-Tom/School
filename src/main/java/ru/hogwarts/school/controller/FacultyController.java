@@ -47,6 +47,11 @@ public class FacultyController {
         return ResponseEntity.ok(facultyService.findFacultyByNameOrColor(query, query));
     }
 
+    @GetMapping("/longest-name")
+    public String getLongestFacultyName() {
+        return facultyService.getLongestFacultyName();
+    }
+
     @GetMapping("/{id}/students")
     public ResponseEntity<List<Student>> getFacultyStudents(@PathVariable Long id) {
         List<Student> students = facultyService.findStudentsOfFaculty(id);
